@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">aYoutube.12</string>
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_shorts">شورتس</string>
+    <string name="tab_subscriptions">الاشتراكات</string>
+    <string name="tab_library">المكتبة</string>
+    <string name="search_placeholder">البحث في aYoutube.12...</string>
+    <string name="subscribe">اشتراك</string>
+    <string name="subscribed">مشترك</string>
+    <string name="like">إعجاب</string>
+    <string name="dislike">لم يعجبني</string>
+    <string name="share">مشاركة</string>
+    <string name="download">تنزيل</string>
+    <string name="save">حفظ</string>
+    <string name="comments">التعليقات</string>
+    <string name="add_comment">إضافة تعليق علني...</string>
+    <string name="up_next">التالي لك</string>
+    <string name="history">سجل المشاهدة</string>
+    <string name="watch_later">المشاهدة لاحقاً</string>
+    <string name="liked_videos">مقاطع الفيديو التي أعجبتني</string>
+    <string name="downloads">التنزيلات في وضع عدم الاتصال</string>
+    <string name="clear_history">مسح السجل</string>
+</resources>
