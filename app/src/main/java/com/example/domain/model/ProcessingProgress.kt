@@ -11,7 +11,8 @@ data class ProcessingProgress(
     val fps: Double = 0.0,
     val frame: Long = 0L,
     val etaSeconds: Long = 0L,
-    val statusDescription: String = "Processing media..."
+    val statusDescription: String = "Processing media...",
+    val runId: Long = 0L
 ) {
     val etaFormatted: String
         get() = if (etaSeconds > 0) {

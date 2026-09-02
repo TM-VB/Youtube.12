@@ -101,7 +101,9 @@ class YtDlpDownloadEngine(
                     downloadedBytes = downloadedBytes,
                     statusText = if (downloadedBytesStr.isNotBlank() && totalBytesStr.isNotBlank()) {
                         "$downloadedBytesStr / $totalBytesStr"
-                    } else downloadedBytesStr
+                    } else downloadedBytesStr,
+                    runId = request.runId,
+                    stage = com.example.domain.model.DownloadStage.DOWNLOADING
                 )
                 onProgress(progressObj)
             }
@@ -139,8 +141,29 @@ class YtDlpDownloadEngine(
                     if (primaryVideo != null && primaryAudio != null && primaryVideo != primaryAudio) {
                         val mergedOut = File(workDir, "merged_${System.currentTimeMillis()}.mp4")
                         try {
+                            onProgress(
+                                DownloadProgress(
+                                    taskId = taskId,
+                                    progressPercentage = 95f,
+                                    statusText = "Merging audio and video...",
+                                    runId = request.runId,
+                                    stage = com.example.domain.model.DownloadStage.MERGING
+                                )
+                            )
                             val ffmpegMgr = ffmpegManager ?: com.example.downloader.ffmpeg.FFmpegManager(context)
-                            val mergeResult = ffmpegMgr.mergeVideoAudio(primaryVideo, primaryAudio, mergedOut, taskId = taskId)
+                            val mergeResult = ffmpegMgr.mergeVideoAudio(primaryVideo, primaryAudio, mergedOut, taskId = taskId) { procProg ->
+                                onProgress(
+                                    DownloadProgress(
+                                        taskId = taskId,
+                                        progressPercentage = (95f + (procProg.percentage * 0.04f)).coerceIn(95f, 99f),
+                                        speed = procProg.speed,
+                                        eta = procProg.etaFormatted,
+                                        statusText = "Merging: ${procProg.percentage.toInt()}%",
+                                        runId = request.runId,
+                                        stage = com.example.domain.model.DownloadStage.MERGING
+                                    )
+                                )
+                            }
                             if (mergeResult.isSuccess && mergedOut.exists() && mergedOut.length() > 0) {
                                 finalFile = mergedOut
                                 // Clean up intermediate unmerged parts
@@ -218,7 +241,8 @@ class YtDlpDownloadEngine(
             title = task.title,
             thumbnailUrl = task.thumbnailUrl,
             formatDescription = task.formatDescription,
-            isAudioOnly = task.formatDescription.contains("Audio", ignoreCase = true)
+            isAudioOnly = task.formatDescription.contains("Audio", ignoreCase = true),
+            runId = task.runId
         )
         return download(request, onProgress)
     }

@@ -37,23 +37,26 @@ interface DownloadTaskDao {
 
     @Query("""
         UPDATE download_tasks 
-        SET status = :status, 
+        SET status = :status,
+            stage = :stage,
             progress = :progress, 
             downloadSpeed = :downloadSpeed, 
             eta = :eta, 
             downloadedSize = CASE WHEN :downloadedSize != '' THEN :downloadedSize ELSE downloadedSize END, 
             totalSize = CASE WHEN :totalSize != '' THEN :totalSize ELSE totalSize END 
-        WHERE id = :id AND status IN ('DOWNLOADING', 'PREPARING', 'PROCESSING_FFMPEG', 'QUEUED')
+        WHERE id = :id AND runId = :runId AND status NOT IN ('PAUSED', 'CANCELLED', 'COMPLETED', 'FAILED')
     """)
     suspend fun updateProgress(
         id: String,
+        runId: Long,
         status: DownloadStatus,
+        stage: com.example.domain.model.DownloadStage,
         progress: Float,
         downloadSpeed: String,
         eta: String,
         downloadedSize: String = "",
         totalSize: String = ""
-    )
+    ): Int
 
     @Query("SELECT * FROM download_tasks WHERE url = :url AND formatId = :formatId AND (((startTime IS NULL OR startTime = '') AND (:startTime IS NULL OR :startTime = '')) OR startTime = :startTime) AND (((endTime IS NULL OR endTime = '') AND (:endTime IS NULL OR :endTime = '')) OR endTime = :endTime) LIMIT 1")
     suspend fun findExistingTask(url: String, formatId: String, startTime: String?, endTime: String?): DownloadTaskEntity?

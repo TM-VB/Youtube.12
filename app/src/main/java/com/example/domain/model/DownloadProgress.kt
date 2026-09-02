@@ -5,6 +5,8 @@ package com.example.domain.model
  */
 data class DownloadProgress(
     val taskId: String,
+    val runId: Long = 0L,
+    val stage: DownloadStage = DownloadStage.DOWNLOADING,
     val progressPercentage: Float = 0f,
     val speed: String = "",
     val eta: String = "",

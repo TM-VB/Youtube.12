@@ -24,13 +24,15 @@ class DownloadRepository(private val dao: DownloadTaskDao) {
 
     suspend fun updateProgress(
         id: String,
+        runId: Long,
         status: com.example.domain.model.DownloadStatus,
+        stage: com.example.domain.model.DownloadStage,
         progress: Float,
         downloadSpeed: String,
         eta: String,
         downloadedSize: String = "",
         totalSize: String = ""
-    ) = dao.updateProgress(id, status, progress, downloadSpeed, eta, downloadedSize, totalSize)
+    ): Int = dao.updateProgress(id, runId, status, stage, progress, downloadSpeed, eta, downloadedSize, totalSize)
 
     suspend fun findExistingTask(url: String, formatId: String, startTime: String?, endTime: String?): DownloadTaskEntity? =
         dao.findExistingTask(url, formatId, startTime, endTime)

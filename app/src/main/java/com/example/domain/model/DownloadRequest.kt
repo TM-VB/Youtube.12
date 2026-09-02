@@ -8,6 +8,7 @@ import java.util.UUID
  */
 data class DownloadRequest(
     val id: String = UUID.randomUUID().toString(),
+    val runId: Long = 0L,
     val url: String,
     val formatSelector: String = "bestvideo+bestaudio/best",
     val startTime: String? = null,

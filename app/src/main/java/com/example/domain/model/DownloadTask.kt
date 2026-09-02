@@ -12,6 +12,8 @@ data class DownloadTask(
     val formatDescription: String,
     val cutSettings: CutSettings = CutSettings(),
     val status: DownloadStatus = DownloadStatus.QUEUED,
+    val stage: DownloadStage = DownloadStage.QUEUED,
+    val runId: Long = 0L,
     val progress: Float = 0f,
     val downloadSpeed: String = "",
     val eta: String = "",

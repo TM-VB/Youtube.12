@@ -2,6 +2,7 @@ package com.example.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.domain.model.DownloadStage
 import com.example.domain.model.DownloadStatus
 
 @Entity(
@@ -24,6 +25,8 @@ data class DownloadTaskEntity(
     val endTime: String? = null,
     val cutMode: String = "none",
     val status: DownloadStatus = DownloadStatus.QUEUED,
+    val stage: DownloadStage = DownloadStage.QUEUED,
+    val runId: Long = 0L,
     val progress: Float = 0f,
     val downloadSpeed: String = "",
     val downloadedSize: String = "",

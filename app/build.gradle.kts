@@ -26,16 +26,30 @@ android {
   signingConfigs {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH")
-      if (keystorePath != null && file(keystorePath).exists()) {
+      val storePasswordEnv = System.getenv("STORE_PASSWORD")
+      val keyAliasEnv = System.getenv("KEY_ALIAS")
+      val keyPasswordEnv = System.getenv("KEY_PASSWORD")
+
+      val hasKeystore = !keystorePath.isNullOrBlank() && file(keystorePath).exists()
+      val hasCredentials = !storePasswordEnv.isNullOrBlank() && !keyAliasEnv.isNullOrBlank() && !keyPasswordEnv.isNullOrBlank()
+
+      if (hasKeystore && hasCredentials) {
         storeFile = file(keystorePath)
-        storePassword = System.getenv("STORE_PASSWORD")
-        keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
-        keyPassword = System.getenv("KEY_PASSWORD")
+        storePassword = storePasswordEnv
+        keyAlias = keyAliasEnv
+        keyPassword = keyPasswordEnv
       } else {
-        storeFile = file("${rootDir}/debug.keystore")
-        storePassword = "android"
-        keyAlias = "androiddebugkey"
-        keyPassword = "android"
+        // Fallback to debug keystore is strictly forbidden for production release
+        val isReleaseTask = gradle.startParameter.taskNames.any {
+          it.contains("release", ignoreCase = true)
+        }
+        if (isReleaseTask) {
+          throw GradleException(
+            "Release signing failed: Production signing credentials are missing or invalid. " +
+            "Please ensure KEYSTORE_PATH, STORE_PASSWORD, KEY_ALIAS, and KEY_PASSWORD environment variables are set " +
+            "and that the keystore exists at KEYSTORE_PATH. Fallback to debug.keystore is strictly disabled."
+          )
+        }
       }
     }
     create("debugConfig") {
@@ -65,8 +79,8 @@ android {
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
   lint {
-    abortOnError = false
-    checkReleaseBuilds = false
+    abortOnError = true
+    checkReleaseBuilds = true
   }
   dependenciesInfo {
     includeInApk = false

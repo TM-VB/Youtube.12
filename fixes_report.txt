@@ -9,8 +9,21 @@
 1. قائمة التعديلات البنيوية والبرمجية الأخيرة:
 --------------------------------------------------------------------------------
 - gradle/wrapper/gradle-wrapper.properties:
-  * إنشاء وضبط الملف لنسخة Gradle 9.1 المتوافقة مع AGP 9.1.1 و Kotlin 2.2.10.
-  * حل مشكلة توقف الـ CI على GitHub Actions بسبب فقدان الملف.
+  * ضبط distributionUrl حصرياً إلى: https://services.gradle.org/distributions/gradle-9.3.1-bin.zip.
+  * توافق كامل بين gradle-wrapper.jar و gradlew وإصدار AGP 9.1.1.
+
+- app/build.gradle.kts (Production-Safe Release Signing):
+  * منع استخدام debug.keystore كـ fallback نهائياً للـ release build.
+  * حصر استخدام debug.keystore على debugConfig / debug build فقط.
+  * فرض إيقاف البناء فوراً مع رسالة خطأ صريحة وواضحة (throw GradleException) إذا لم تتوفر production credentials (KEYSTORE_PATH, STORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD) أثناء بناء مهام الـ release.
+  * عدم تخزين أي كلمات سر أو مفاتيح صريحة داخل المستودع.
+
+- .github/workflows/build-apk.yml:
+  * فصل خطوة بناء Debug APK عن خطوة بناء Release APK/AAB.
+  * اختبارات testDebugUnitTest وبناء assembleDebug تعملان بدون الحاجة إلى release secrets.
+  * تشغيل بناء assembleRelease و bundleRelease مشروط بوجود مفتاح وتفاصيل التوقيع في الـ GitHub Secrets.
+  * منع إنتاج أي Release APK/AAB موقع بمفتاح Debug.
+  * التحقق من وجود الملفات الفعلية قبل محاولة رفع الـ Artifacts.
 
 - settings.gradle.kts:
   * ضبط rootProject.name = "Youtube.12".
