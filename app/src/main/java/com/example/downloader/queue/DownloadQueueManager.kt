@@ -637,6 +637,10 @@ class DownloadQueueManager(
         totalBytes: Long,
         smoother: SpeedSmoother
     ) {
+        if (!activeJobs.containsKey(taskId)) {
+            return
+        }
+
         val now = System.currentTimeMillis()
         val lastTime = lastProgressUpdateTimes[taskId] ?: 0L
         val lastProg = lastReportedProgress[taskId] ?: 0f

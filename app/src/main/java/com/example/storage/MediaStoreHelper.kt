@@ -146,15 +146,18 @@ object MediaStoreHelper {
                         val publicPath = "${Environment.getExternalStoragePublicDirectory(targetDir)}/DownloadVideos/$displayName"
                         Log.d(TAG, "Saved to MediaStore: uri=$uri, sourceSize=${sourceFile.length()}, written=$bytesWritten, publicPath=$publicPath")
 
-                        // Scan file with MediaScanner to guarantee Gallery / Photos thumbnail generation
-                        try {
-                            MediaScannerConnection.scanFile(
-                                context.applicationContext,
-                                arrayOf(publicPath),
-                                arrayOf(mimeType),
-                                null
-                            )
-                        } catch (_: Exception) {}
+                        // On pre-Q Android, scan file with MediaScanner for gallery detection.
+                        // On Android Q+, setting IS_PENDING = 0 automatically triggers MediaProvider scanning.
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                            try {
+                                MediaScannerConnection.scanFile(
+                                    context.applicationContext,
+                                    arrayOf(publicPath),
+                                    arrayOf(mimeType),
+                                    null
+                                )
+                            } catch (_: Exception) {}
+                        }
 
                         return Pair(uri, publicPath)
                     } else {

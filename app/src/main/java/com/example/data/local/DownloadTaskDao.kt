@@ -35,7 +35,16 @@ interface DownloadTaskDao {
     @Update
     suspend fun updateTask(task: DownloadTaskEntity)
 
-    @Query("UPDATE download_tasks SET status = :status, progress = :progress, downloadSpeed = :downloadSpeed, eta = :eta, downloadedSize = CASE WHEN :downloadedSize != '' THEN :downloadedSize ELSE downloadedSize END, totalSize = CASE WHEN :totalSize != '' THEN :totalSize ELSE totalSize END WHERE id = :id")
+    @Query("""
+        UPDATE download_tasks 
+        SET status = :status, 
+            progress = :progress, 
+            downloadSpeed = :downloadSpeed, 
+            eta = :eta, 
+            downloadedSize = CASE WHEN :downloadedSize != '' THEN :downloadedSize ELSE downloadedSize END, 
+            totalSize = CASE WHEN :totalSize != '' THEN :totalSize ELSE totalSize END 
+        WHERE id = :id AND status IN ('DOWNLOADING', 'PREPARING', 'PROCESSING_FFMPEG', 'QUEUED')
+    """)
     suspend fun updateProgress(
         id: String,
         status: DownloadStatus,

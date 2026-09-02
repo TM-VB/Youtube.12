@@ -153,6 +153,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         videoFile: File,
         audioFile: File,
         outputFile: File,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> = withContext(Dispatchers.IO) {
         if (!videoFile.exists() || !audioFile.exists()) {
@@ -169,7 +170,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
             return@withContext Result.failure(DownloadError.StorageError("Insufficient storage space for media merge."))
         }
 
-        val processId = UUID.randomUUID().toString()
+        val processId = taskId ?: UUID.randomUUID().toString()
         val tempOutput = createTempProcessingFile("merge", outputFile.extension)
 
         val args = FFmpegCommandBuilder.buildMergeArgs(
@@ -202,6 +203,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         startTime: String,
         endTime: String,
         outputFile: File,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> = withContext(Dispatchers.IO) {
         if (!inputFile.exists()) {
@@ -212,7 +214,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
             ?: return@withContext Result.failure(DownloadError.FfmpegError("FFmpeg binary unavailable."))
 
         val totalDuration = calculateDurationSeconds(startTime, endTime)
-        val processId = UUID.randomUUID().toString()
+        val processId = taskId ?: UUID.randomUUID().toString()
         val tempOutput = createTempProcessingFile("fastcut", outputFile.extension)
 
         val args = FFmpegCommandBuilder.buildFastCutArgs(
@@ -246,6 +248,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         startTime: String,
         endTime: String,
         outputFile: File,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> = withContext(Dispatchers.IO) {
         if (!inputFile.exists()) {
@@ -256,7 +259,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
             ?: return@withContext Result.failure(DownloadError.FfmpegError("FFmpeg binary unavailable."))
 
         val totalDuration = calculateDurationSeconds(startTime, endTime)
-        val processId = UUID.randomUUID().toString()
+        val processId = taskId ?: UUID.randomUUID().toString()
         val tempOutput = createTempProcessingFile("precisecut", outputFile.extension)
 
         val args = FFmpegCommandBuilder.buildPreciseCutArgs(
@@ -291,11 +294,12 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         startTime: String,
         endTime: String,
         mode: CutMode,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> {
         return when (mode) {
-            CutMode.FAST_CUT -> fastCut(inputFile, startTime, endTime, outputFile, onProgress)
-            CutMode.PRECISE_CUT -> preciseCut(inputFile, startTime, endTime, outputFile, onProgress)
+            CutMode.FAST_CUT -> fastCut(inputFile, startTime, endTime, outputFile, taskId, onProgress)
+            CutMode.PRECISE_CUT -> preciseCut(inputFile, startTime, endTime, outputFile, taskId, onProgress)
         }
     }
 
@@ -303,6 +307,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         inputFile: File,
         outputFile: File,
         targetContainer: String,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> = withContext(Dispatchers.IO) {
         if (!inputFile.exists()) {
@@ -312,7 +317,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         val binary = getFFmpegBinary()
             ?: return@withContext Result.failure(DownloadError.FfmpegError("FFmpeg binary unavailable."))
 
-        val processId = UUID.randomUUID().toString()
+        val processId = taskId ?: UUID.randomUUID().toString()
         val tempOutput = createTempProcessingFile("remux", targetContainer)
 
         val args = FFmpegCommandBuilder.buildRemuxArgs(
@@ -343,6 +348,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         inputFile: File,
         outputFile: File,
         audioCodec: String,
+        taskId: String?,
         onProgress: ((ProcessingProgress) -> Unit)?
     ): Result<MediaResult> = withContext(Dispatchers.IO) {
         if (!inputFile.exists()) {
@@ -352,7 +358,7 @@ class FFmpegManager(private val context: Context) : MediaProcessor {
         val binary = getFFmpegBinary()
             ?: return@withContext Result.failure(DownloadError.FfmpegError("FFmpeg binary unavailable."))
 
-        val processId = UUID.randomUUID().toString()
+        val processId = taskId ?: UUID.randomUUID().toString()
         val tempOutput = createTempProcessingFile("extract_audio", outputFile.extension)
 
         val args = FFmpegCommandBuilder.buildExtractAudioArgs(

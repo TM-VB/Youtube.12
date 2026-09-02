@@ -14,6 +14,7 @@ interface MediaProcessor {
         videoFile: File,
         audioFile: File,
         outputFile: File,
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 
@@ -22,6 +23,7 @@ interface MediaProcessor {
         startTime: String,
         endTime: String,
         outputFile: File,
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 
@@ -30,6 +32,7 @@ interface MediaProcessor {
         startTime: String,
         endTime: String,
         outputFile: File,
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 
@@ -39,6 +42,7 @@ interface MediaProcessor {
         startTime: String,
         endTime: String,
         mode: CutMode,
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 
@@ -46,6 +50,7 @@ interface MediaProcessor {
         inputFile: File,
         outputFile: File,
         targetContainer: String,
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 
@@ -53,6 +58,7 @@ interface MediaProcessor {
         inputFile: File,
         outputFile: File,
         audioCodec: String = "aac",
+        taskId: String? = null,
         onProgress: ((ProcessingProgress) -> Unit)? = null
     ): Result<MediaResult>
 

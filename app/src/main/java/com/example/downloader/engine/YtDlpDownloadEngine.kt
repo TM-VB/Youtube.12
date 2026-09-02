@@ -140,7 +140,7 @@ class YtDlpDownloadEngine(
                         val mergedOut = File(workDir, "merged_${System.currentTimeMillis()}.mp4")
                         try {
                             val ffmpegMgr = ffmpegManager ?: com.example.downloader.ffmpeg.FFmpegManager(context)
-                            val mergeResult = ffmpegMgr.mergeVideoAudio(primaryVideo, primaryAudio, mergedOut)
+                            val mergeResult = ffmpegMgr.mergeVideoAudio(primaryVideo, primaryAudio, mergedOut, taskId = taskId)
                             if (mergeResult.isSuccess && mergedOut.exists() && mergedOut.length() > 0) {
                                 finalFile = mergedOut
                                 // Clean up intermediate unmerged parts
@@ -167,6 +167,20 @@ class YtDlpDownloadEngine(
                 )
                 cleanupWorkDir(workDir)
                 return@withContext Result.failure(fileError)
+            }
+
+            if (!request.outputDestination.isNullOrBlank()) {
+                try {
+                    val targetDest = File(request.outputDestination)
+                    targetDest.parentFile?.mkdirs()
+                    if (finalFile.renameTo(targetDest)) {
+                        finalFile = targetDest
+                    } else {
+                        finalFile.copyTo(targetDest, overwrite = true)
+                        finalFile.delete()
+                        finalFile = targetDest
+                    }
+                } catch (_: Throwable) {}
             }
 
             YtDlpLogger.logDownloadCompleted(
@@ -222,7 +236,13 @@ class YtDlpDownloadEngine(
     }
 
     fun buildYoutubeDLRequest(workDir: File, request: DownloadRequest, cookiesFile: File? = null): YoutubeDLRequest {
-        val outputPattern = "${workDir.absolutePath}/%(title)s.%(ext)s"
+        val outputPattern = if (!request.outputName.isNullOrBlank()) {
+            val baseName = request.outputName.substringBeforeLast('.')
+            val sanitized = com.example.domain.util.FileNameSanitizer.sanitize(baseName)
+            "${workDir.absolutePath}/$sanitized.%(ext)s"
+        } else {
+            "${workDir.absolutePath}/%(title)s.%(ext)s"
+        }
         val req = YoutubeDLRequest(request.url.trim())
 
         req.addOption("-o", outputPattern)
